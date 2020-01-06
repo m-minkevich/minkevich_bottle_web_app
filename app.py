@@ -1,6 +1,37 @@
 import sqlite3
 from bottle import route, run, debug, template, request
 
+# @route('/')
+# def index():
+#     return template('home.tpl')
+
+@route('/subjects')
+def subjects():
+    return template('subjects.tpl')
+
+@route('/create-subject')
+def new_subject():
+    if request.GET.save:
+
+        new = request.GET.subject.strip()
+        conn = sqlite3.connect('todo.db')
+        c = conn.cursor()
+
+        c.execute("INSERT INTO todo (task,status) VALUES (?,?)", (new,1))
+        new_id = c.lastrowid
+
+        conn.commit()
+        c.close()
+
+        return '<p>The new task was inserted into the database, the ID is %s</p>' % new_id
+    else:
+        return template('new_task.tpl')
+
+@route('/test')
+def test():
+    return template('test.tpl', title = 'matvei')
+
+
 @route('/todo')
 def todo_list():
     conn = sqlite3.connect('todo.db')

@@ -34,9 +34,19 @@ def new_project():
     else:
         return template('new_project.tpl')
 
-@route('/<no:int>')
-def project_overview(no):
-    return template('project_overview.tpl')
+@route('/<no:int>', method="GET")
+def project_overview(no:int):
+
+    connection = sqlite3.connect('projects.db')
+    c = connection.cursor()
+    c.execute("SELECT name, author FROM projects WHERE id LIKE ?", str(no))
+
+    result = c.fetchall()
+    c.close()
+
+    print(no, result[0])
+
+    return template('project_overview.tpl', result=result)
 
 @route('/subjects')
 def subjects():

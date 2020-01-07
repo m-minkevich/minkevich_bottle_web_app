@@ -1,6 +1,7 @@
 % rebase('base.tpl', title='Page Title')
 
 <div style="background-color: wheat; padding: 24px;">
-    Here is my project overview
+    
+    You have selected the project named {{result[0][0]}} which was created by {{result[0][1]}}
 
 </div>

@@ -1,9 +1,42 @@
 import sqlite3
 from bottle import route, run, debug, template, request
 
-# @route('/')
-# def index():
-#     return template('home.tpl')
+@route('/')
+def index():
+
+    conn = sqlite3.connect('projects.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM projects")
+    result = c.fetchall()
+    c.close()
+
+    # return template('home.tpl')
+    print(result[0][1])
+    return template('home.tpl', rows=result)
+
+@route('/new-project')
+def new_project():
+    if request.GET.save:
+
+        name = request.GET.name.strip()
+        author = request.GET.author.strip()
+
+        conn = sqlite3.connect('projects.db')
+        c = conn.cursor()
+
+        c.execute("INSERT INTO projects (name, author) VALUES (?,?)", (name,author))
+        new_id = c.lastrowid
+
+        conn.commit()
+        c.close()
+
+        return '<p>The new project was inserted into the database, the ID is %s</p>' % new_id
+    else:
+        return template('new_project.tpl')
+
+@route('/<no:int>')
+def project_overview(no):
+    return template('project_overview.tpl')
 
 @route('/subjects')
 def subjects():

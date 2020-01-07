@@ -1,6 +1,8 @@
 import sqlite3
 from bottle import route, run, debug, template, request
 
+
+
 @route('/')
 def index():
 
@@ -46,11 +48,39 @@ def project_overview(no:int):
 
     print(no, result[0])
 
-    return template('project_overview.tpl', result=result)
+    return template('project_overview.tpl', result=result, no=no)
 
-@route('/subjects')
-def subjects():
-    return template('subjects.tpl')
+@route('/<no:int>/subjects')
+def subjects(no):
+
+    conn = sqlite3.connect('projects.db')
+    c = conn.cursor()
+
+    c.execute("SELECT name, places FROM subjects WHERE reference LIKE ?", str(no))
+    result = c.fetchall()
+    c.close()
+
+    print(result)
+
+    if request.GET.save:
+        print('Save request!')
+        
+        new_subject = request.GET.subject.strip()
+
+        c = conn.cursor()
+   
+        c.execute("INSERT INTO subjects (name,places) VALUES (?,?)", (new_subject, 20))
+
+        conn.commit()
+        c.close()
+
+        return template('subjects.tpl', rows=result, no=no)
+    else:
+        return template('subjects.tpl', rows=result, no=no)
+
+
+
+
 
 @route('/create-subject')
 def new_subject():

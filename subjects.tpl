@@ -3,8 +3,9 @@
 <div style="background-color: wheat; padding: 24px;">
     Here is my creation form
 
-    <form action="/subjects" method="GET">
-        <input type="text" placeholder="Enter name" style="height: 30px;" name="subject">
+    <form action="/{{no}}/subjects" method="GET">
+        <input type="text" placeholder="Enter the name of the subject" style="height: 30px;" name="subject">
+        <input type="text" placeholder="Number of places" style="height: 30px;" name="places">
         <button type="submit" style="height: 30px;" name="save" value="save">Create Subject</button>
     </form>
 

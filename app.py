@@ -1,10 +1,21 @@
 import sqlite3
 from bottle import route, run, debug, template, request
 
-
-
 @route('/')
 def index():
+    if request.GET.save:
+
+        first_name = request.GET.first_name.strip()
+        last_name = request.GET.last_name.strip()
+        birth = request.GET.birth.strip()
+
+        conn = sqlite3.connect('projects.db')
+        c = conn.cursor()
+
+        c.execute("INSERT INTO projects (first_name, last_name, birth) VALUES (?,?,?)", (first_name,last_name,birth))
+        new_id = c.lastrowid
+
+        conn.commit()
 
     conn = sqlite3.connect('projects.db')
     c = conn.cursor()
@@ -13,28 +24,31 @@ def index():
     c.close()
 
     # return template('home.tpl')
-    print(result[0][1])
+    print(result[0])
     return template('home.tpl', rows=result)
 
-@route('/new-project')
-def new_project():
-    if request.GET.save:
+@route('/new-student')
+def new_student():
+    return template('new_student.tpl')
 
-        name = request.GET.name.strip()
-        author = request.GET.author.strip()
 
-        conn = sqlite3.connect('projects.db')
-        c = conn.cursor()
+    # if request.GET.save:
 
-        c.execute("INSERT INTO projects (name, author) VALUES (?,?)", (name,author))
-        new_id = c.lastrowid
+    #     name = request.GET.name.strip()
+    #     author = request.GET.author.strip()
 
-        conn.commit()
-        c.close()
+    #     conn = sqlite3.connect('projects.db')
+    #     c = conn.cursor()
 
-        return '<p>The new project was inserted into the database, the ID is %s</p>' % new_id
-    else:
-        return template('new_project.tpl')
+    #     c.execute("INSERT INTO projects (name, author) VALUES (?,?)", (name,author))
+    #     new_id = c.lastrowid
+
+    #     conn.commit()
+    #     c.close()
+
+    #     return '<p>The new project was inserted into the database, the ID is %s</p>' % new_id
+    # else:
+    #     return template('new_project.tpl')
 
 @route('/<no:int>', method="GET")
 def project_overview(no:int):
@@ -65,11 +79,12 @@ def subjects(no):
     if request.GET.save:
         print('Save request!')
         
-        new_subject = request.GET.subject.strip()
+        subject = request.GET.subject.strip()
+        places = request.GET.places.strip()
 
         c = conn.cursor()
    
-        c.execute("INSERT INTO subjects (name,places) VALUES (?,?)", (new_subject, 20))
+        c.execute("INSERT INTO subjects (name,places,reference) VALUES (?,?,?)", (subject, places,no))
 
         conn.commit()
         c.close()

@@ -1,25 +1,35 @@
 import sqlite3
 from bottle import route, run, debug, template, request
 
+def delete(table,id):
+
+    conn = sqlite3.connect('projects.db')
+
+    action = 'DELETE FROM ' + table + ' WHERE id=?'
+    c = conn.cursor()
+    c.execute(action, (str(id)))
+    conn.commit()
+
 @route('/')
 def index():
     if request.GET.save:
+
+        conn = sqlite3.connect('projects.db')
 
         first_name = request.GET.first_name.strip()
         last_name = request.GET.last_name.strip()
         birth = request.GET.birth.strip()
 
-        conn = sqlite3.connect('projects.db')
         c = conn.cursor()
 
-        c.execute("INSERT INTO projects (first_name, last_name, birth) VALUES (?,?,?)", (first_name,last_name,birth))
+        c.execute("INSERT INTO students (first_name, last_name, birth) VALUES (?,?,?)", (first_name,last_name,birth))
         new_id = c.lastrowid
 
         conn.commit()
 
     conn = sqlite3.connect('projects.db')
     c = conn.cursor()
-    c.execute("SELECT * FROM projects")
+    c.execute("SELECT * FROM students")
     result = c.fetchall()
     c.close()
 
@@ -31,31 +41,46 @@ def index():
 def new_student():
     return template('new_student.tpl')
 
+@route('/teachers')
+def show_teachers():
 
-    # if request.GET.save:
+    conn = sqlite3.connect('projects.db')
 
-    #     name = request.GET.name.strip()
-    #     author = request.GET.author.strip()
+    c = conn.cursor()
 
-    #     conn = sqlite3.connect('projects.db')
-    #     c = conn.cursor()
+    if request.GET.save:
 
-    #     c.execute("INSERT INTO projects (name, author) VALUES (?,?)", (name,author))
-    #     new_id = c.lastrowid
+        conn = sqlite3.connect('projects.db')
+        c = conn.cursor()
 
-    #     conn.commit()
-    #     c.close()
+        first_name = request.GET.first_name.strip()
+        last_name = request.GET.last_name.strip()
 
-    #     return '<p>The new project was inserted into the database, the ID is %s</p>' % new_id
-    # else:
-    #     return template('new_project.tpl')
+        c.execute("INSERT INTO teachers (first_name,last_name) VALUES (?,?)", (first_name, last_name))
+
+        conn.commit()
+    
+    if request.GET.delete:
+
+        with conn:
+            delete('teachers',1)
+
+    c.execute("SELECT * FROM teachers")
+    result = c.fetchall()
+    c.close() 
+
+    return template('teachers.tpl', rows=result)
+
+@route('/new-teacher')
+def new_student():
+    return template('new_teacher.tpl')
 
 @route('/<no:int>', method="GET")
 def project_overview(no:int):
 
     connection = sqlite3.connect('projects.db')
     c = connection.cursor()
-    c.execute("SELECT name, author FROM projects WHERE id LIKE ?", str(no))
+    c.execute("SELECT first_name, last_name FROM projects WHERE id LIKE ?", str(no))
 
     result = c.fetchall()
     c.close()

@@ -9,12 +9,12 @@
     }
 </style>
 
-    <div id="navbar" style="background-color: black; margin: 0px; padding: 16px; display: flex;">
-        <a href="/">Students</a>
-        <a href="/teachers">Teachers</a>
-        <div style="flex: 1;"></div>
-        <a href="/new-student">Create New Student</a>
-    </div>
+<div id="navbar" style="background-color: black; margin: 0px; padding: 16px; display: flex;">
+    <a href="/">Students</a>
+    <a href="/teachers">Teachers</a>
+    <div style="flex: 1;"></div>
+    <a href="/new-teacher">Create New Teacher</a>
+</div>
 
 <head>
 
@@ -34,25 +34,15 @@
         <p>Id: {{row[0]}}</p>
     </div>
     <form action="/{{row[0]}}" method="get">
-        <input type="submit", name="select", value="Select">
-        <input type="submit", name="update", value="Update">
+        <input type="submit", name="select", value="Select">  
+    </form>
+    <form action="/teachers" method="get">
         <input type="submit", name="delete", value="Delete">
     </form>
+    
 </div>
 %end
     
-%#template to generate a HTML table from a list of tuples (or list of lists, or tuple of tuples or ...)
-<p>The open items are as follows:</p>
-<table border="1">
-%for row in rows:
-  <tr>
-  %for col in row:
-    <td>{{col}}</td>
-  %end
-  </tr>
-%end
-</table>
-
-
 </body>
+
 </html>

@@ -25,3 +25,13 @@
 </body>
 </html>
 
+<div style="display: flex; align-items: center;">
+  %for row in rows:
+    <div style="background-color: wheat;">
+      <p>Name: {{row[1]}} {{row[2]}}</p>
+    </div>
+    <div style="background-color: blueviolet;">
+      <input type="text">
+    </div>
+  %end
+</div>

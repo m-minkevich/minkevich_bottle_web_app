@@ -11,10 +11,7 @@
 
     <div id="navbar" style="background-color: black; margin: 0px; padding: 16px; display: flex;">
         <a href="/">Students</a>
-        <a href="/{{no}}/subjects">Lessons</a>
-        <a href="/groups">Groups</a>
         <div style="flex: 1;"></div>
-        <!-- <a href="/int">Home</a> -->
     </div>
 
 <head>

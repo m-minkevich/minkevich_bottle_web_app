@@ -1,6 +1,18 @@
 import sqlite3
 from bottle import route, run, debug, template, request
 
+def fetch_all(table):
+    conn = sqlite3.connect('projects.db')
+    c = conn.cursor()
+
+    action = 'SELECT * FROM ' + table
+
+    c.execute(action)
+    result = c.fetchall()
+    c.close()
+
+    return result
+
 def delete(table,id):
 
     conn = sqlite3.connect('projects.db')
@@ -23,7 +35,7 @@ def index():
         c = conn.cursor()
 
         c.execute("INSERT INTO students (first_name, last_name, birth) VALUES (?,?,?)", (first_name,last_name,birth))
-        new_id = c.lastrowid
+        # new_id = c.lastrowid
 
         conn.commit()
 
@@ -34,7 +46,7 @@ def index():
     c.close()
 
     # return template('home.tpl')
-    print(result[0])
+    # print(result[0])
     return template('home.tpl', rows=result)
 
 @route('/new-student')
@@ -87,123 +99,39 @@ def project_overview(no:int):
 
     connection = sqlite3.connect('projects.db')
     c = connection.cursor()
-    c.execute("SELECT first_name, last_name FROM projects WHERE id LIKE ?", str(no))
 
+    c.execute("SELECT first_name, last_name FROM students WHERE id LIKE ?", str(no))
     result = c.fetchall()
+
+    teachers = fetch_all('teachers')
+
+    # c.execute("SELECT tid, first_name, last_name, number_of_hours FROM teachers INNER JOIN lessons on lessons.teacher_id = teachers.tid")
+    # teachers = c.fetchall()
+
+    print(teachers)
+
     c.close()
 
-    print(no, result[0])
+    return template('student_order.tpl', result=result, no=no, rows=teachers, student_id=no)
 
-    return template('project_overview.tpl', result=result, no=no)
-
-@route('/<no:int>/subjects')
-def subjects(no):
-
-    conn = sqlite3.connect('projects.db')
-    c = conn.cursor()
-
-    c.execute("SELECT name, places FROM subjects WHERE reference LIKE ?", str(no))
-    result = c.fetchall()
-    c.close()
-
-    print(result)
-
+@route('/save-lesson-for-<t:int>-<st:int>', method="GET")
+def save_lesson(t:int,st:int):
     if request.GET.save:
-        print('Save request!')
-        
-        subject = request.GET.subject.strip()
-        places = request.GET.places.strip()
-
-        c = conn.cursor()
-   
-        c.execute("INSERT INTO subjects (name,places,reference) VALUES (?,?,?)", (subject, places,no))
-
-        conn.commit()
-        c.close()
-
-        return template('subjects.tpl', rows=result, no=no)
-    else:
-        return template('subjects.tpl', rows=result, no=no)
-
-
-
-
-
-@route('/create-subject')
-def new_subject():
-    if request.GET.save:
-
-        new = request.GET.subject.strip()
-        conn = sqlite3.connect('todo.db')
+    
+        conn = sqlite3.connect('projects.db')
         c = conn.cursor()
 
-        c.execute("INSERT INTO todo (task,status) VALUES (?,?)", (new,1))
-        new_id = c.lastrowid
+        number_of_hours = request.GET.hours.strip()
 
-        conn.commit()
-        c.close()
-
-        return '<p>The new task was inserted into the database, the ID is %s</p>' % new_id
-    else:
-        return template('new_task.tpl')
-
-@route('/test')
-def test():
-    return template('test.tpl', title = 'matvei')
-
-
-@route('/todo')
-def todo_list():
-    conn = sqlite3.connect('todo.db')
-    c = conn.cursor()
-    c.execute("SELECT id, task FROM todo WHERE status LIKE '1'")
-    result = c.fetchall()
-    c.close()
-    return template('make_table', rows=result)
-
-@route('/new', method='GET')
-def new_item():
-
-    if request.GET.save:
-
-        new = request.GET.task.strip()
-        conn = sqlite3.connect('todo.db')
-        c = conn.cursor()
-
-        c.execute("INSERT INTO todo (task,status) VALUES (?,?)", (new,1))
-        new_id = c.lastrowid
-
-        conn.commit()
-        c.close()
-
-        return '<p>The new task was inserted into the database, the ID is %s</p>' % new_id
-    else:
-        return template('new_task.tpl')
-
-@route('/edit/<no:int>', method='GET')
-def edit_item(no):
-
-    if request.GET.save:
-        edit = request.GET.task.strip()
-        status = request.GET.status.strip()
-
-        if status == 'open':
-            status = 1
+        for row in c.execute("SELECT number_of_hours FROM lessons WHERE teacher_id=? AND student_id=?", (t,st)):
+            print("FOUND!")
+            c.execute("UPDATE lessons SET number_of_hours=? WHERE teacher_id=? AND student_id=?", (number_of_hours,t,st))
+            break
         else:
-            status = 0
-
-        conn = sqlite3.connect('todo.db')
-        c = conn.cursor()
-        c.execute("UPDATE todo SET task = ?, status = ? WHERE id LIKE ?", (edit, status, no))
+            print("NOT FOUND!!!")
+            c.execute("INSERT INTO lessons (student_id,teacher_id,number_of_hours) VALUES (?,?,?)", (st,t,number_of_hours))
+            
         conn.commit()
-
-        return '<p>The item number %s was successfully updated</p>' % no
-    else:
-        conn = sqlite3.connect('todo.db')
-        c = conn.cursor()
-        c.execute("SELECT task FROM todo WHERE id LIKE ?", (str(no),))
-        cur_data = c.fetchone()
-
-        return template('edit_task', old=cur_data, no=no)
+        return project_overview(st)
 
 run(host='localhost', port=8080, debug=True)

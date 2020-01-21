@@ -7,7 +7,7 @@ def delete(table,id):
 
     action = 'DELETE FROM ' + table + ' WHERE id=?'
     c = conn.cursor()
-    c.execute(action, (str(id)))
+    c.execute(action, (str(id),))
     conn.commit()
 
 @route('/')
@@ -41,6 +41,12 @@ def index():
 def new_student():
     return template('new_student.tpl')
 
+@route('/delete-student-<no:int>')
+def delete_teacher(no:int):
+    if request.GET.delete:
+        delete('students',no)
+        return index()
+
 @route('/teachers')
 def show_teachers():
 
@@ -60,11 +66,6 @@ def show_teachers():
 
         conn.commit()
     
-    if request.GET.delete:
-
-        with conn:
-            delete('teachers',1)
-
     c.execute("SELECT * FROM teachers")
     result = c.fetchall()
     c.close() 
@@ -74,6 +75,12 @@ def show_teachers():
 @route('/new-teacher')
 def new_student():
     return template('new_teacher.tpl')
+
+@route('/delete-teacher-<no:int>')
+def delete_teacher(no:int):
+    if request.GET.delete:
+        delete('teachers',no)
+        return show_teachers()
 
 @route('/<no:int>', method="GET")
 def project_overview(no:int):

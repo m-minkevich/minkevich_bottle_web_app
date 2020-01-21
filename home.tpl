@@ -35,7 +35,8 @@
     </div>
     <form action="/{{row[0]}}" method="get">
         <input type="submit", name="select", value="Select">
-        <input type="submit", name="update", value="Update">
+    </form>
+    <form action="/delete-student-{{row[0]}}" method="get">
         <input type="submit", name="delete", value="Delete">
     </form>
 </div>

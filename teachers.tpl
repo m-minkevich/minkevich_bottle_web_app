@@ -36,7 +36,7 @@
     <form action="/{{row[0]}}" method="get">
         <input type="submit", name="select", value="Select">  
     </form>
-    <form action="/teachers" method="get">
+    <form action="/delete-teacher-{{row[0]}}" method="get">
         <input type="submit", name="delete", value="Delete">
     </form>
     

@@ -103,10 +103,11 @@ def project_overview(no:int):
     c.execute("SELECT first_name, last_name FROM students WHERE id LIKE ?", str(no))
     result = c.fetchall()
 
-    teachers = fetch_all('teachers')
+    # teachers = fetch_all('teachers')
 
-    # c.execute("SELECT tid, first_name, last_name, number_of_hours FROM teachers INNER JOIN lessons on lessons.teacher_id = teachers.tid")
-    # teachers = c.fetchall()
+
+    c.execute("SELECT tid, first_name, last_name, number_of_hours FROM teachers LEFT JOIN lessons ON teachers.tid = lessons.teacher_id AND lessons.student_id LIKE ?", str(no))
+    teachers = c.fetchall()
 
     print(teachers)
 

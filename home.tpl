@@ -23,23 +23,18 @@
 <body style="margin: 0px; font-family: Arial, Helvetica, sans-serif;">
  
 %for row in rows:
-<div style="background-color: wheat;">
-
-    <div style="background-color: chartreuse;">
-        <p>First Name: {{row[1]}}</p>
+<div style="background-color: lightgray; margin: 8px; padding: 16px;">
+    <p>First Name: <b>{{row[1]}}</b></p>
+    <p>Last Name: <b>{{row[2]}}</b></p>
+    <p>Id: {{row[0]}}</p>
+    <div style="display: flex;">
+        <form action="/{{row[0]}}" method="get">
+         <input type="submit", name="select", value="Select">
+        </form>
+        <form action="/delete-student-{{row[0]}}" method="get">
+         <input type="submit", name="delete", value="Delete", style="background-color: red; border-radius: 4px">
+        </form>
     </div>
-    <div style="background-color: coral;">
-        <p>Last Name: {{row[2]}}</p>
-    </div>
-    <div>
-        <p>Id: {{row[0]}}</p>
-    </div>
-    <form action="/{{row[0]}}" method="get">
-        <input type="submit", name="select", value="Select">
-    </form>
-    <form action="/delete-student-{{row[0]}}" method="get">
-        <input type="submit", name="delete", value="Delete">
-    </form>
 </div>
 %end
 

@@ -1,14 +1,11 @@
 % rebase('base.tpl', title='Page Title')
 
-<div style="background-color: wheat; padding: 24px;">
-    
-    You have selected {{result[0][0]}} {{result[0][1]}}
-
+<div style="padding: 24px;">
+    <p>You have selected <b>{{result[0][0]}} {{result[0][1]}}</b></p>
 </div>
 
-
 %for row in rows:
-<div style="display: flex; padding: 24px; align-items: center;">
+<div style="display: flex; padding: 12px; align-items: center; margin: 8px;">
   <form action="/save-lesson-for-{{row[0]}}-{{student_id}}" method="GET">
     <fieldset>
         <legend>{{row[1]}} {{row[2]}}</legend>

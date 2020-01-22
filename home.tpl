@@ -12,6 +12,7 @@
     <div id="navbar" style="background-color: black; margin: 0px; padding: 16px; display: flex;">
         <a href="/">Students</a>
         <a href="/teachers">Teachers</a>
+        <a href="/workload.png">Workload</a>
         <div style="flex: 1;"></div>
         <a href="/new-student">Create New Student</a>
     </div>
@@ -41,19 +42,6 @@
     </form>
 </div>
 %end
-    
-%#template to generate a HTML table from a list of tuples (or list of lists, or tuple of tuples or ...)
-<p>The open items are as follows:</p>
-<table border="1">
-%for row in rows:
-  <tr>
-  %for col in row:
-    <td>{{col}}</td>
-  %end
-  </tr>
-%end
-</table>
-
 
 </body>
 </html>

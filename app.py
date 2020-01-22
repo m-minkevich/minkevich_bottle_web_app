@@ -1,4 +1,10 @@
 import sqlite3
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+import io
 from bottle import route, run, debug, template, request
 
 def fetch_all(table):
@@ -24,65 +30,43 @@ def delete(table,id):
 
 @route('/')
 def index():
+    conn = sqlite3.connect('projects.db')
+    c = conn.cursor()
+
     if request.GET.save:
-
-        conn = sqlite3.connect('projects.db')
-
         first_name = request.GET.first_name.strip()
         last_name = request.GET.last_name.strip()
         birth = request.GET.birth.strip()
 
-        c = conn.cursor()
-
         c.execute("INSERT INTO students (first_name, last_name, birth) VALUES (?,?,?)", (first_name,last_name,birth))
-        # new_id = c.lastrowid
-
         conn.commit()
 
-    conn = sqlite3.connect('projects.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM students")
-    result = c.fetchall()
-    c.close()
-
-    # return template('home.tpl')
-    # print(result[0])
-    return template('home.tpl', rows=result)
+    results = fetch_all('students')
+    return template('home.tpl', rows=results)
 
 @route('/new-student')
 def new_student():
     return template('new_student.tpl')
 
 @route('/delete-student-<no:int>')
-def delete_teacher(no:int):
+def delete_student(no:int):
     if request.GET.delete:
         delete('students',no)
         return index()
 
 @route('/teachers')
 def show_teachers():
-
-    conn = sqlite3.connect('projects.db')
-
-    c = conn.cursor()
-
     if request.GET.save:
-
         conn = sqlite3.connect('projects.db')
         c = conn.cursor()
-
         first_name = request.GET.first_name.strip()
         last_name = request.GET.last_name.strip()
 
         c.execute("INSERT INTO teachers (first_name,last_name) VALUES (?,?)", (first_name, last_name))
-
         conn.commit()
     
-    c.execute("SELECT * FROM teachers")
-    result = c.fetchall()
-    c.close() 
-
-    return template('teachers.tpl', rows=result)
+    results = fetch_all('teachers')
+    return template('teachers.tpl', rows=results)
 
 @route('/new-teacher')
 def new_student():
@@ -95,7 +79,7 @@ def delete_teacher(no:int):
         return show_teachers()
 
 @route('/<no:int>', method="GET")
-def project_overview(no:int):
+def student_overview(no:int):
 
     connection = sqlite3.connect('projects.db')
     c = connection.cursor()
@@ -103,36 +87,44 @@ def project_overview(no:int):
     c.execute("SELECT first_name, last_name FROM students WHERE id LIKE ?", str(no))
     result = c.fetchall()
 
-    # teachers = fetch_all('teachers')
-
-
-    c.execute("SELECT tid, first_name, last_name, number_of_hours FROM teachers LEFT JOIN lessons ON teachers.tid = lessons.teacher_id AND lessons.student_id LIKE ?", str(no))
+    c.execute("SELECT id, first_name, last_name, number_of_hours FROM teachers LEFT JOIN lessons ON teachers.id = lessons.teacher_id AND lessons.student_id LIKE ?", str(no))
     teachers = c.fetchall()
 
-    print(teachers)
-
     c.close()
-
     return template('student_order.tpl', result=result, no=no, rows=teachers, student_id=no)
 
 @route('/save-lesson-for-<t:int>-<st:int>', method="GET")
 def save_lesson(t:int,st:int):
     if request.GET.save:
-    
         conn = sqlite3.connect('projects.db')
         c = conn.cursor()
 
         number_of_hours = request.GET.hours.strip()
 
         for row in c.execute("SELECT number_of_hours FROM lessons WHERE teacher_id=? AND student_id=?", (t,st)):
-            print("FOUND!")
             c.execute("UPDATE lessons SET number_of_hours=? WHERE teacher_id=? AND student_id=?", (number_of_hours,t,st))
             break
         else:
-            print("NOT FOUND!!!")
             c.execute("INSERT INTO lessons (student_id,teacher_id,number_of_hours) VALUES (?,?,?)", (st,t,number_of_hours))
             
         conn.commit()
-        return project_overview(st)
+        c.close()
+        return student_overview(st)
+
+@route('/workload.png')
+def workload_png():
+    fig = create_barchart()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    output.getvalue()
+    return template('workload.tpl', mimetype='image/png')
+
+def create_barchart():
+    fig = Figure()
+    axis = fig.add_subplot(1, 1, 1)
+    xs = range(100)
+    ys = [random.randint(1, 50) for x in xs]
+    axis.plot(xs, ys)
+    return fig
 
 run(host='localhost', port=8080, debug=True)

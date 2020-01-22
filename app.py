@@ -1,14 +1,8 @@
 import sqlite3
-import numpy as np
-import random
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-import io
 from bottle import route, run, debug, template, request
 
 def fetch_all(table):
-    conn = sqlite3.connect('projects.db')
+    conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
     action = 'SELECT * FROM ' + table
@@ -21,7 +15,7 @@ def fetch_all(table):
 
 def delete(table,id):
 
-    conn = sqlite3.connect('projects.db')
+    conn = sqlite3.connect('database.db')
 
     action = 'DELETE FROM ' + table + ' WHERE id=?'
     c = conn.cursor()
@@ -30,7 +24,7 @@ def delete(table,id):
 
 @route('/')
 def index():
-    conn = sqlite3.connect('projects.db')
+    conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
     if request.GET.save:
@@ -42,7 +36,7 @@ def index():
         conn.commit()
 
     results = fetch_all('students')
-    return template('home.tpl', rows=results)
+    return template('students.tpl', rows=results)
 
 @route('/new-student')
 def new_student():
@@ -57,7 +51,7 @@ def delete_student(no:int):
 @route('/teachers')
 def show_teachers():
     if request.GET.save:
-        conn = sqlite3.connect('projects.db')
+        conn = sqlite3.connect('database.db')
         c = conn.cursor()
         first_name = request.GET.first_name.strip()
         last_name = request.GET.last_name.strip()
@@ -81,7 +75,7 @@ def delete_teacher(no:int):
 @route('/<no:int>', method="GET")
 def student_overview(no:int):
 
-    connection = sqlite3.connect('projects.db')
+    connection = sqlite3.connect('database.db')
     c = connection.cursor()
 
     c.execute("SELECT first_name, last_name FROM students WHERE id LIKE ?", str(no))
@@ -96,7 +90,7 @@ def student_overview(no:int):
 @route('/save-lesson-for-<t:int>-<st:int>', method="GET")
 def save_lesson(t:int,st:int):
     if request.GET.save:
-        conn = sqlite3.connect('projects.db')
+        conn = sqlite3.connect('database.db')
         c = conn.cursor()
 
         number_of_hours = request.GET.hours.strip()
@@ -111,20 +105,24 @@ def save_lesson(t:int,st:int):
         c.close()
         return student_overview(st)
 
-@route('/workload.png')
-def workload_png():
-    fig = create_barchart()
-    output = io.BytesIO()
-    FigureCanvas(fig).print_png(output)
-    output.getvalue()
-    return template('workload.tpl', mimetype='image/png')
+@route('/workload')
+def workload():
+    data = list()
 
-def create_barchart():
-    fig = Figure()
-    axis = fig.add_subplot(1, 1, 1)
-    xs = range(100)
-    ys = [random.randint(1, 50) for x in xs]
-    axis.plot(xs, ys)
-    return fig
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    c.execute("SELECT SUM(number_of_hours) FROM lessons GROUP BY teacher_id")
+    results = c.fetchall()
+
+    for result in results:
+        data.append(result[0])
+    print(data)
+
+    labels = fetch_all('teachers')
+
+    chartData = {"labels": labels, "data": {"hours": data}}
+
+    return template('workload.tpl', chartData=chartData)
 
 run(host='localhost', port=8080, debug=True)

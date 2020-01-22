@@ -12,7 +12,7 @@
     <div id="navbar" style="background-color: black; margin: 0px; padding: 16px; display: flex;">
         <a href="/">Students</a>
         <a href="/teachers">Teachers</a>
-        <a href="/workload.png">Workload</a>
+        <a href="/workload">Workload</a>
         <div style="flex: 1;"></div>
         <a href="/new-student">Create New Student</a>
     </div>

@@ -10,7 +10,6 @@
     <div id="navbar" style="background-color: black; margin: 0px; padding: 16px; display: flex;">
         <a href="/">Students</a>
         <a href="/teachers">Teachers</a>
-        <a href="/workload.png">Workload</a>
     </div>
 
 <form action="/" method="GET">
